@@ -45,7 +45,14 @@ const getIssueCount = (
     });
 };
 
-const getOpenIssueCountByTimeRange = (owner, repoName, from, to) => {
+const getOpenIssueCountByTimeRange = (
+  owner,
+  repoName,
+  from,
+  to,
+  onSuccessCallBack,
+  onFailureCallBack
+) => {
   let url;
   if (to) {
     url = `search/issues?q=repo:${owner}/${repoName}+is:issue+is:open+created:${from}..${to}`;
@@ -53,11 +60,17 @@ const getOpenIssueCountByTimeRange = (owner, repoName, from, to) => {
     url = `search/issues?q=repo:${owner}/${repoName}+is:issue+is:open+created:<${from}`;
   }
 
-  return axios({
+  axios({
     method: "GET",
     url: url,
     baseURL: baseURL
-  });
+  })
+    .then(response => {
+      onSuccessCallBack(response);
+    })
+    .catch(error => {
+      onFailureCallBack(error);
+    });
 };
 
 export default {
