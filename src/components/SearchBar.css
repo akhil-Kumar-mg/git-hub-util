@@ -1,0 +1,11 @@
+.search_bar_row {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-left: 100px;
+  margin-right: 100px;
+}
+
+.search_bar_col {
+  margin-left: 100px;
+  width: 90%;
+}

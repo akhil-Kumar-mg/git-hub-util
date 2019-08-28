@@ -3,7 +3,7 @@ import axios from "axios";
 const baseURL = "https://api.github.com";
 
 /*
-    This list includes both the open issues and the open pr
+    Fetch the issue metadata of a repo. The total count in this is the combination of open pr and open issues
  */
 const getIssueMetaData = (owner, repoName) => {
   let url = `/repos/${owner}/${repoName}`;
@@ -14,6 +14,9 @@ const getIssueMetaData = (owner, repoName) => {
   });
 };
 
+/*
+  Fetch the pull request metadata
+  */
 const getPullRequestMetaData = (owner, repoName) => {
   let url = `search/issues?q=repo:${owner}/${repoName}+is:pr+is:open`;
   return axios({
@@ -22,37 +25,32 @@ const getPullRequestMetaData = (owner, repoName) => {
     baseURL: baseURL
   });
 };
-
-const getIssueCount = (
-  owner,
-  repoName,
-  onSuccessCallBack,
-  onFailureCallBack
-) => {
-  Promise.all([
+/*
+  Sometimes to match the issue count seen in the ui we need to use this
+  Yet to figure out the reason
+  */
+const getIssueCountMethod1 = (owner, repoName) => {
+  return [
     getIssueMetaData(owner, repoName),
     getPullRequestMetaData(owner, repoName)
-  ])
-    .then(responses => {
-      const response = {
-        issueData: responses[0].data,
-        pullRequestData: responses[1].data
-      };
-      onSuccessCallBack(response);
-    })
-    .catch(error => {
-      onFailureCallBack(error);
-    });
+  ];
+};
+/*
+ Ideal way of fetching the open issue count
+ */
+const getIssueCountMethod2 = (owner, repoName) => {
+  let url = `search/issues?q=repo:${owner}/${repoName}+is:issue+is:open`;
+  return axios({
+    method: "GET",
+    url: url,
+    baseURL: baseURL
+  });
 };
 
-const getOpenIssueCountByTimeRange = (
-  owner,
-  repoName,
-  from,
-  to,
-  onSuccessCallBack,
-  onFailureCallBack
-) => {
+/*
+  Fetch the issues created in a time perid
+  */
+const getOpenIssueCountByTimeRange = (owner, repoName, from, to) => {
   let url;
   if (to) {
     url = `search/issues?q=repo:${owner}/${repoName}+is:issue+is:open+created:${from}..${to}`;
@@ -60,20 +58,15 @@ const getOpenIssueCountByTimeRange = (
     url = `search/issues?q=repo:${owner}/${repoName}+is:issue+is:open+created:<${from}`;
   }
 
-  axios({
+  return axios({
     method: "GET",
     url: url,
     baseURL: baseURL
-  })
-    .then(response => {
-      onSuccessCallBack(response);
-    })
-    .catch(error => {
-      onFailureCallBack(error);
-    });
+  });
 };
 
 export default {
-  getIssueCount,
+  getIssueCountMethod1,
+  getIssueCountMethod2,
   getOpenIssueCountByTimeRange
 };

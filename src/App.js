@@ -1,137 +1,71 @@
 import React, { Component } from "react";
-import GitHubService from "./service/gitHubService";
+import SearchBar from "./components/SearchBar";
+import Table from "./components/Table";
 
-import DateUtil from "./util/DateUtil";
-import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
+import "./components/Table.css";
+import "./App.css";
 
 class App extends Component {
   state = {
-    totalOpenIssueCount: null,
-    errorTxt: null,
+    totalOpenIssueCountByMethod1: null,
+    totalOpenIssueCountByMethod2: null,
     totalOpenIssuesInLast24hours: null,
     totalOpenIssuesWithIn7Days: null,
-    totalOpenIssueBefore7Days: null
+    issuesOlderThan7Days: null,
+    errorTxt: "",
+    validUrl: true
   };
 
-  onSucess = response => {
-    let issueCount = response.issueData.open_issues_count;
-    let pullRequestCount = response.pullRequestData.total_count;
-    let totalOpenIssueCount = issueCount - pullRequestCount;
+  handleSubmit = response => {
     this.setState({
-      totalOpenIssueCount: totalOpenIssueCount,
-      errorTxt: null
+      totalOpenIssueCountByMethod1:
+        response.issueInfo.totalOpenIssueCountByMethod1,
+      totalOpenIssueCountByMethod2:
+        response.issueInfo.totalOpenIssueCountByMethod2,
+      totalOpenIssuesInLast24hours:
+        response.issueInfo.totalOpenIssuesInLast24hours,
+      totalOpenIssuesWithIn7Days: response.issueInfo.totalOpenIssuesWithIn7Days,
+      issuesOlderThan7Days: response.issueInfo.totalOpenissuesOlderThan7Days,
+      errorTxt: response.errorTxt,
+      validUrl: response.validUrl
     });
   };
-  onError = error => {
-    this.setState({
-      totalOpenIssueCount: null,
-      errorTxt: error.response.statusText
-    });
-  };
-  // componentDidMount() {
-  //   GitHubService.getIssueCount(
-  //     "microsoft",
-  //     "vscode",
-  //     this.onSucess,
-  //     this.onError
-  //   );
-
-  //   GitHubService.getOpenIssueCountByTimeRange(
-  //     "microsoft",
-  //     "vscode",
-  //     DateUtil.getPriorDate(1),
-  //     DateUtil.getCurrentDate(),
-  //     response => {
-  //       this.setState({
-  //         totalOpenIssuesInLast24hours: response.data.total_count,
-  //         totalOpenIssuesWithIn7Days: null,
-  //         totalOpenIssueBefore7Days: null
-  //       });
-  //     },
-  //     error => {
-  //       console.log(error);
-  //     }
-  //   );
-  //   GitHubService.getOpenIssueCountByTimeRange(
-  //     "microsoft",
-  //     "vscode",
-  //     DateUtil.getPriorDate(1),
-  //     DateUtil.getCurrentDate(),
-  //     response => {
-  //       this.setState({
-  //         totalOpenIssuesInLast24hours: response.data.total_count
-  //       });
-  //     },
-  //     error => {
-  //       console.log(error);
-  //     }
-  //   );
-
-  //   GitHubService.getOpenIssueCountByTimeRange(
-  //     "microsoft",
-  //     "vscode",
-  //     DateUtil.getPriorDate(7),
-  //     DateUtil.getPriorDate(1),
-  //     response => {
-  //       this.setState({
-  //         totalOpenIssuesWithIn7Days: response.data.total_count
-  //       });
-  //     },
-  //     error => {
-  //       console.log(error);
-  //     }
-  //   );
-
-  //   GitHubService.getOpenIssueCountByTimeRange(
-  //     "microsoft",
-  //     "vscode",
-  //     DateUtil.getPriorDate(7),
-  //     null,
-  //     response => {
-  //       this.setState({
-  //         totalOpenIssueBefore7Days: response.data.total_count
-  //       });
-  //     },
-  //     error => {
-  //       console.log(error);
-  //     }
-  //   );
-  // }
+  /*
+ Based on the type of error the error message is populated in the ui 
+ */
   render() {
-    return (
-      <div className="form-group">
-        <div>
-          <Form>
-            <Form.Group controlId="formBasicEmail">
-              <Form.Label>Email address</Form.Label>
-              <Form.Control type="email" placeholder="Enter email" />
-              <Form.Text className="text-muted">
-                We'll never share your email with anyone else.
-              </Form.Text>
-            </Form.Group>
-
-            <Form.Group controlId="formBasicPassword">
-              <Form.Label>Password</Form.Label>
-              <Form.Control type="password" placeholder="Password" />
-            </Form.Group>
-            <Form.Group controlId="formBasicChecbox">
-              <Form.Check type="checkbox" label="Check me out" />
-            </Form.Group>
-            <Button variant="primary" type="submit">
-              Submit
-            </Button>
-          </Form>
+    let errorMessage;
+    let message = "";
+    if (this.state.errorTxt) {
+      message = this.state.errorTxt;
+    } else if (!this.state.validUrl) {
+      message = "Invalid Url";
+    }
+    if (message) {
+      errorMessage = (
+        <div className="row">
+          <div style={{ margin: "0px auto" }}>
+            <div className="alert alert-warning">
+              <strong>Warning!</strong> {message}
+            </div>
+          </div>
         </div>
-        {this.state.totalOpenIssueCount}
-        <br />
-        {this.state.errorTxt}
-        <br />
-        {this.state.totalOpenIssuesInLast24hours}
-        <br />
-        {this.state.totalOpenIssuesWithIn7Days}
-        <br />
-        {this.state.totalOpenIssueBefore7Days}
+      );
+    }
+
+    return (
+      <div className="container-fluid">
+        <SearchBar handleSubmit={this.handleSubmit} />
+        <div className="row table_padding">
+          <Table
+            totalIssueCountByMethod1={this.state.totalOpenIssueCountByMethod1}
+            totalIssueCountByMethod2={this.state.totalOpenIssueCountByMethod2}
+            issuesWithIn24hours={this.state.totalOpenIssuesInLast24hours}
+            issuesWithIn7Days={this.state.totalOpenIssuesWithIn7Days}
+            issuesOlderThan7Days={this.state.issuesOlderThan7Days}
+          />
+        </div>
+        {errorMessage}
       </div>
     );
   }
