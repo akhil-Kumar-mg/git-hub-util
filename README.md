@@ -22,9 +22,9 @@ Query structure is as follows
 Without authentication the requests might get forbidden response due to api-rate limitation for a public user
 If we authenticate our application the request rate can be increased.
 
-###Improvement 
-There is nothing much to improve since i'm using the Git Api's.
-If the complexity increases for this application, i'll introduce redux to manage the state of the application.
+### Improvement 
+i'm using the Git Api's hence the improvement is limited from the code perspective
+If the complexity increases for this application in the future, i'll introduce redux to manage the state of the application.
 
 #### Application is hosted on AWS
 URL:
