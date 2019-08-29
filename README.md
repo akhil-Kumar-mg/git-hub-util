@@ -25,7 +25,8 @@ If we authenticate our application the request rate can be increased.
 ### Improvement 
 i'm using the Git Api's hence the improvement is limited from the code perspective
 If the complexity increases for this application in the future, i'll introduce redux to manage the state of the application.
+Also, i would like to make the ui dumb and create a backend service to communicate with the git server
 
 #### Application is hosted on AWS
-URL:
-gitHublink: 
+URL: ec2-18-217-194-207.us-east-2.compute.amazonaws.com:3000
+gitHublink: https://github.com/akhil-Kumar-mg/git-hub-util/
